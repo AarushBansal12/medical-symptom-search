@@ -1,0 +1,15 @@
+[project]
+name = "medical-symptom-search"
+version = "0.1.0"
+description = "Hybrid BM25 + Semantic medical symptoms search engine with Gemini RAG"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-genai>=2.8.0",
+    "nltk==3.9.1",
+    "numpy==2.3.3",
+    "python-dotenv>=1.2.2",
+    "sentence-transformers>=5.5.1",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.29.0",
+]

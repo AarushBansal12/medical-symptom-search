@@ -1,0 +1,44 @@
+{
+  "test_cases": [
+    {
+      "query": "chest pain shortness of breath",
+      "relevant_docs": ["Heart Attack", "Angina", "Pulmonary Embolism", "Heart Failure", "Pneumonia"]
+    },
+    {
+      "query": "fever headache stiff neck light sensitivity",
+      "relevant_docs": ["Meningitis", "Influenza (Flu)", "Migraine"]
+    },
+    {
+      "query": "joint pain swelling morning stiffness",
+      "relevant_docs": ["Rheumatoid Arthritis", "Gout", "Osteoarthritis", "Lupus"]
+    },
+    {
+      "query": "excessive thirst frequent urination weight loss",
+      "relevant_docs": ["Type 1 Diabetes", "Type 2 Diabetes"]
+    },
+    {
+      "query": "itchy skin rash red patches",
+      "relevant_docs": ["Eczema", "Psoriasis", "Hay Fever", "Food Allergy"]
+    },
+    {
+      "query": "persistent cough blood weight loss night sweats",
+      "relevant_docs": ["Tuberculosis", "Lung Cancer", "COPD"]
+    },
+    {
+      "query": "sudden weakness one side face arm speech difficulty",
+      "relevant_docs": ["Stroke"]
+    },
+    {
+      "query": "stomach pain nausea vomiting diarrhea after eating",
+      "relevant_docs": ["Food Poisoning", "Gastroenteritis", "Appendicitis", "Peptic Ulcer"]
+    },
+    {
+      "query": "feeling very sad no energy loss of interest sleep changes",
+      "relevant_docs": ["Depression", "Bipolar Disorder", "Hypothyroidism", "Anemia"]
+    },
+    {
+      "query": "lower back pain radiating down leg numbness",
+      "relevant_docs": ["Sciatica", "Multiple Sclerosis"]
+    }
+  ]
+}
