@@ -1,0 +1,46 @@
+.filtersContainer {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 6px 12px;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.filterGroup:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.selectInput {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  outline: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.selectInput option {
+  background: var(--bg-secondary);
+  color: var(--text-main);
+}
