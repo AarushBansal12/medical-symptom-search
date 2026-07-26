@@ -20,7 +20,7 @@ app = FastAPI(title="Medical Symptoms Search API", version="1.0.0")
 # Allow React dev server and deployed frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://medical-symptom-search-abc123.vercel.app"],
+    allow_origins=["https://medical-symptom-search-8nlq.vercel.app"],,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
