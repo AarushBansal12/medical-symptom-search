@@ -26,15 +26,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load once on startup
-print("Loading search engine...")
-conditions = load_conditions()
-search_engine = HybridSearch(conditions)
-print(f"✅ Ready — {len(conditions)} conditions indexed.")
+# Lazy loading variables
+conditions = None
+search_engine = None
+CATEGORIES = None
 
-CATEGORIES = sorted(set(c["category"] for c in conditions))
 SEVERITIES = ["Emergency", "Severe", "Chronic-Severe", "Moderate-Severe",
               "Moderate", "Mild-Moderate", "Mild-Severe", "Mild", "Chronic"]
+
+
+def get_search_engine():
+    global conditions, search_engine, CATEGORIES
+    if search_engine is None:
+        print("Loading search engine...")
+        conditions = load_conditions()
+        search_engine = HybridSearch(conditions)
+        CATEGORIES = sorted(set(c["category"] for c in conditions))
+        print(f"✅ Ready — {len(conditions)} conditions indexed.")
+    return search_engine, conditions, CATEGORIES
 
 
 @app.get("/")
@@ -43,12 +52,13 @@ def root():
 
 
 @app.get("/categories")
-def get_categories():
-    return {"categories": CATEGORIES}
+def get_categories_endpoint():
+    _, _, categories = get_search_engine()
+    return {"categories": categories}
 
 
 @app.get("/severities")
-def get_severities():
+def get_severities_endpoint():
     return {"severities": SEVERITIES}
 
 
@@ -60,7 +70,8 @@ def search(
     limit: int = Query(10, ge=1, le=20),
     k: int = Query(60),
 ):
-    results = search_engine.rrf_search(query=q, k=k, limit=50)
+    engine, _, _ = get_search_engine()
+    results = engine.rrf_search(query=q, k=k, limit=50)
 
     # Apply filters
     filtered = []
