@@ -1,10 +1,9 @@
+from sentence_transformers import SentenceTransformer
 import math
 import numpy as np
 import os
 import json
 import re
-import requests
-import time
 
 from lib.search_utils import CACHE_PATH
 
@@ -42,54 +41,22 @@ def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
 
 class SemanticSearch:
     def __init__(self):
-        self.api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
-        self.token = os.environ.get("HF_TOKEN")
-        
-        if not self.token:
-            print("Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.")
-            
-        self.headers = {"Authorization": f"Bearer {self.token}"} if self.token else {}
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
         self.embeddings = None
         self.documents = None
         self.document_map = {}
 
-    def _query_hf_api(self, texts: list[str]) -> np.ndarray:
-        response = requests.post(self.api_url, headers=self.headers, json={"inputs": texts})
-        
-        # Retry logic if the model is currently loading on HF's servers
-        if response.status_code == 503:
-            estimated_time = response.json().get("estimated_time", 10.0)
-            print(f"Model is loading on Hugging Face API. Waiting {estimated_time} seconds...")
-            time.sleep(estimated_time)
-            response = requests.post(self.api_url, headers=self.headers, json={"inputs": texts})
-            
-        if response.status_code != 200:
-            raise ValueError(f"Hugging Face API Error: {response.text}")
-            
-        return np.array(response.json())
-
     def generate_embedding(self, text: str) -> np.ndarray:
         if not text or not text.strip():
             raise ValueError("Text cannot be empty")
-        return self._query_hf_api([text])[0]
+        return self.model.encode([text])[0]
 
     def build_embeddings(self, documents: list[dict]) -> np.ndarray:
         self.documents = documents
         for doc in documents:
             self.document_map[doc["id"]] = doc
         texts = [f"{doc['title']}: {doc['description']}" for doc in documents]
-        
-        # Process in batches of 100 to avoid API payload limits
-        batch_size = 100
-        all_embeddings = []
-        
-        print(f"Generating embeddings for {len(texts)} documents via Hugging Face API...")
-        for i in range(0, len(texts), batch_size):
-            batch_texts = texts[i:i + batch_size]
-            batch_embeddings = self._query_hf_api(batch_texts)
-            all_embeddings.extend(batch_embeddings)
-            
-        self.embeddings = np.array(all_embeddings)
+        self.embeddings = self.model.encode(texts, show_progress_bar=True)
         os.makedirs(CACHE_PATH, exist_ok=True)
         np.save(str(CACHE_PATH / "condition_embeddings.npy"), self.embeddings)
         return self.embeddings
@@ -142,17 +109,7 @@ class ChunkedSemanticSearch(SemanticSearch):
                 chunk_metadata.append(
                     {"condition_idx": cond_idx, "chunk_idx": chunk_idx, "total_chunks": len(chunks)}
                 )
-        # Process in batches of 100 to avoid API payload limits
-        batch_size = 100
-        all_embeddings = []
-        
-        print(f"Generating embeddings for {len(all_chunks)} chunks via Hugging Face API...")
-        for i in range(0, len(all_chunks), batch_size):
-            batch_texts = all_chunks[i:i + batch_size]
-            batch_embeddings = self._query_hf_api(batch_texts)
-            all_embeddings.extend(batch_embeddings)
-            
-        self.chunk_embeddings = np.array(all_embeddings)
+        self.chunk_embeddings = self.model.encode(all_chunks, show_progress_bar=True)
         self.chunk_metadata = chunk_metadata
         os.makedirs(CACHE_PATH, exist_ok=True)
         np.save(str(CACHE_PATH / "chunk_embeddings.npy"), self.chunk_embeddings)
