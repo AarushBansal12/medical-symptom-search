@@ -99,6 +99,8 @@ class ChunkedSemanticSearch(SemanticSearch):
         self.documents = documents
         for doc in documents:
             self.document_map[doc["id"]] = doc
+        print("Step 1: Building chunks...")
+
         all_chunks = []
         chunk_metadata = []
         for cond_idx, doc in enumerate(documents):
@@ -111,12 +113,17 @@ class ChunkedSemanticSearch(SemanticSearch):
                 chunk_metadata.append(
                     {"condition_idx": cond_idx, "chunk_idx": chunk_idx, "total_chunks": len(chunks)}
                 )
+        print(f"Step 2: Total chunks = {len(all_chunks)}")
+        print("Step 3: Starting embedding generation...")
         self.chunk_embeddings = np.array(list(self.model.embed(all_chunks)))
+        print("Step 4: Embeddings generated")
         self.chunk_metadata = chunk_metadata
         os.makedirs(CACHE_PATH, exist_ok=True)
         np.save(str(CACHE_PATH / "chunk_embeddings.npy"), self.chunk_embeddings)
+        print("Step 5: Saved embeddings")
         with open(str(CACHE_PATH / "chunk_metadata.json"), "w") as f:
             json.dump({"chunks": chunk_metadata, "total_chunks": len(all_chunks)}, f)
+        print("Step 6: Finished build_chunk_embeddings")
         return self.chunk_embeddings
 
     def load_or_create_chunk_embeddings(self, documents: list[dict]) -> np.ndarray:
@@ -130,6 +137,7 @@ class ChunkedSemanticSearch(SemanticSearch):
             with open(str(meta_file)) as f:
                 self.chunk_metadata = json.load(f)["chunks"]
             return self.chunk_embeddings
+        print("No cache found. Building embeddings...")
         return self.build_chunk_embeddings(documents)
 
     def search_chunks(self, query: str, limit: int = 10) -> list[dict]:
