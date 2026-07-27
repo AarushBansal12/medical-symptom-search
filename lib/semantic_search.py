@@ -1,4 +1,4 @@
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 import math
 import numpy as np
 import os
@@ -41,7 +41,9 @@ def cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
 
 class SemanticSearch:
     def __init__(self):
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.model = TextEmbedding(
+            model_name="BAAI/bge-small-en-v1.5"
+        )
         self.embeddings = None
         self.documents = None
         self.document_map = {}
@@ -49,14 +51,14 @@ class SemanticSearch:
     def generate_embedding(self, text: str) -> np.ndarray:
         if not text or not text.strip():
             raise ValueError("Text cannot be empty")
-        return self.model.encode([text])[0]
+        return np.array(list(self.model.embed([text]))[0])
 
     def build_embeddings(self, documents: list[dict]) -> np.ndarray:
         self.documents = documents
         for doc in documents:
             self.document_map[doc["id"]] = doc
         texts = [f"{doc['title']}: {doc['description']}" for doc in documents]
-        self.embeddings = self.model.encode(texts, show_progress_bar=True)
+        self.embeddings = np.array(list(self.model.embed(texts)))
         os.makedirs(CACHE_PATH, exist_ok=True)
         np.save(str(CACHE_PATH / "condition_embeddings.npy"), self.embeddings)
         return self.embeddings
@@ -109,7 +111,7 @@ class ChunkedSemanticSearch(SemanticSearch):
                 chunk_metadata.append(
                     {"condition_idx": cond_idx, "chunk_idx": chunk_idx, "total_chunks": len(chunks)}
                 )
-        self.chunk_embeddings = self.model.encode(all_chunks, show_progress_bar=True)
+        self.chunk_embeddings = np.array(list(self.model.embed(all_chunks)))
         self.chunk_metadata = chunk_metadata
         os.makedirs(CACHE_PATH, exist_ok=True)
         np.save(str(CACHE_PATH / "chunk_embeddings.npy"), self.chunk_embeddings)
@@ -161,8 +163,7 @@ class ChunkedSemanticSearch(SemanticSearch):
 
 def verify_model():
     s = SemanticSearch()
-    print(f"Model: {s.model!s}")
-    print(f"Max sequence length: {s.model.max_seq_length}")
+    print(s.model)
 
 
 def embed_text(text: str):

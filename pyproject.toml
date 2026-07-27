@@ -9,7 +9,8 @@ dependencies = [
     "nltk==3.9.1",
     "numpy==2.3.3",
     "python-dotenv>=1.2.2",
-    "sentence-transformers>=5.5.1",
+    "fastembed>=0.7.1",
+    "onnxruntime>=1.22.0",
     "fastapi>=0.110.0",
     "uvicorn>=0.29.0",
 ]

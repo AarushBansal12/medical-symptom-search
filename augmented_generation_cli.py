@@ -67,7 +67,7 @@ Retrieved Conditions:
 
 Answer:"""
 
-            response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+            response = client.models.generate_content(model="gemma-4-31b-it", contents=prompt)
             print("Search Results:")
             for r in results:
                 print(f"- {r['doc']['title']}")
