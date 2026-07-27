@@ -20,7 +20,11 @@ app = FastAPI(title="Medical Symptoms Search API", version="1.0.0")
 # Allow React dev server and deployed frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://medical-symptom-search-8nlq.vercel.app"],
+    allow_origins=[
+        "https://medical-symptom-search-8nlq.vercel.app",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -93,7 +97,20 @@ def search(
             "query": q,
             "total": len(filtered),
             "results": [
-                # ← keep this entire return exactly as it already is
+                {
+                    "id": r["doc"].get("id"),
+                    "title": r["doc"].get("title"),
+                    "category": r["doc"].get("category"),
+                    "severity": r["doc"].get("severity"),
+                    "symptoms": r["doc"].get("symptoms"),
+                    "causes": r["doc"].get("causes"),
+                    "what_to_do": r["doc"].get("what_to_do"),
+                    "description": r["doc"].get("description"),
+                    "rrf_score": r.get("rrf_score"),
+                    "bm25_rank": r.get("bm25_rank"),
+                    "semantic_rank": r.get("semantic_rank"),
+                }
+                for r in filtered
             ]
         }
 
