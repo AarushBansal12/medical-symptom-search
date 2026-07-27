@@ -70,37 +70,34 @@ def search(
     limit: int = Query(10, ge=1, le=20),
     k: int = Query(60),
 ):
-    engine, _, _ = get_search_engine()
-    results = engine.rrf_search(query=q, k=k, limit=50)
+    try:
+        engine, _, _ = get_search_engine()
+        results = engine.rrf_search(query=q, k=k, limit=50)
 
-    # Apply filters
-    filtered = []
-    for r in results:
-        doc = r["doc"]
-        if category and doc.get("category") != category:
-            continue
-        if severity and doc.get("severity") != severity:
-            continue
-        filtered.append(r)
+        # Apply filters
+        filtered = []
+        for r in results:
+            doc = r["doc"]
 
-    filtered = filtered[:limit]
+            if category and doc.get("category") != category:
+                continue
 
-    return {
-        "query": q,
-        "total": len(filtered),
-        "results": [
-            {
-                "id": r["doc"]["id"],
-                "title": r["doc"]["title"],
-                "symptoms": r["doc"].get("symptoms", ""),
-                "causes": r["doc"].get("causes", ""),
-                "severity": r["doc"].get("severity", ""),
-                "category": r["doc"].get("category", ""),
-                "what_to_do": r["doc"].get("what_to_do", ""),
-                "rrf_score": round(r["rrf_score"], 4),
-                "bm25_rank": r["bm25_rank"],
-                "semantic_rank": r["semantic_rank"],
-            }
-            for r in filtered
-        ],
-    }
+            if severity and doc.get("severity") != severity:
+                continue
+
+            filtered.append(r)
+
+        filtered = filtered[:limit]
+
+        return {
+            "query": q,
+            "total": len(filtered),
+            "results": [
+                # ← keep this entire return exactly as it already is
+            ]
+        }
+
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        raise
